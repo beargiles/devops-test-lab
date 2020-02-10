@@ -17,10 +17,10 @@ services:
     restart: unless-stopped
     environment:
       CASSANDRA_START_RPC: "true"
-    -- logging:
-    --   driver: syslog
-    --   options:
-    --     syslog-address: "udp://syslog:514"
-    --     syslog-facility: local3
-    --     tag: cassandra
-    --     labels: cassandra
+    # logging:
+    #   driver: syslog
+    #   options:
+    #     syslog-address: "udp://syslog:514"
+    #     syslog-facility: local3
+    #     tag: cassandra
+    #     labels: cassandra
