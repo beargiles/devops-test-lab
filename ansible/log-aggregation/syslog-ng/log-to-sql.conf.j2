@@ -1,0 +1,39 @@
+#
+# Log to relational database
+#
+
+options { use_uniqid(yes); };
+
+source s_net { tcp(ip("{{ syslog_server }}") port(6514)); };
+
+destination d_db_syslog {
+        sql(
+                type(pgsql)
+                host("{{ dbhost }}")
+                database("{{ dbname }}")
+                username("{{ dbuser }}")
+                password("{{ dbpassword }}")
+                table("{{ tablename }}")
+                columns("rcptid int8", "seqnum int", "uniqid", "timestamp timestamptz", "host", "facility", "level", "lno int", "pri int", "tags", "program", "pid int", "message")
+                values("$RCPTID", "$SEQNUM", "$UNIQID", "$ISODATE", "$HOST", "$FACILITY", "$LEVEL", "$LEVEL_NUM", "$PRI", "$TAGS", "$PROGRAM", "$PID", "$MSG")
+                indexes("timestamp", "host", "program", "pid", "message")
+        );
+};
+
+
+filter f_no_debug { not level(debug); };
+filter f_not_dhcp { not program("^dhclient.*$"); };
+
+filter f_not_xdg_desktop { not program("^xdg-desktop-por.*$"); };
+filter f_not_gdm_x_session { not program("^/usr/lib/gdm3/gdm-x-session$"); };
+
+
+log {
+        source(s_src); source(s_net);
+        filter(f_no_debug);
+        filter(f_not_dhcp);
+        filter(f_not_xdg_desktop);
+        filter(f_not_gdm_x_session);
+        destination(d_db_syslog);
+};
+

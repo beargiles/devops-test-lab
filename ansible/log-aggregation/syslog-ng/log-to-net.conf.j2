@@ -1,0 +1,28 @@
+#
+# sample syslog-ng configuration that forwards logs to
+# a central location.
+#
+# /etc/syslog-ng/conf.d/log-to-net.conf
+#
+destination d_net_udp {
+    udp("{{ syslog_hostname }}"
+      port(514)
+      log_fifo_size(1000)
+      mark-freq(1200));
+};
+
+destination d_net_tcp {
+    tcp("{{ syslog_hostname }}"
+      port(6514)
+      log_fifo_size(1000)
+      mark-freq(1200));
+};
+
+# this is very noisy
+filter f_not_dhcp { not program("^dhclient.*$"); };
+
+log {
+    source(s_src);
+    filter(f_not_dhcp);
+    destination(d_net_tcp);
+};
